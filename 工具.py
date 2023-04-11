@@ -34,16 +34,23 @@ def getKataGoLatestVersion():
             size = file["size"]
             break
 
-    if getFileSize("./katago") != size:
-        print("Downloading katago...")
-        subprocess.call(f"wget -O ./katago {download_url_}", shell=True)
-        print("Downloaded katago successfully.")
+    if getFileSize("./katago") == 0:
+        print("Downloading katago.zip...")
+        status1 = callShell(f"wget -O /content/katago.zip {download_url_}")
+        handle_process(status1, "downloaded katago.zip", "downloading katago.zip", 1)
+        chmod()
+
+        if isFileExists("/content/katago.zip") and (not isProcessFailed(1)):
+            chmod()
+            print("Unzipping katago.zip")
+            status2 = callShell("unzip -o /content/katago.zip -d \"/content/\"")
+            handle_process(status2, "unzipped katago.zip", "unzipping katago.zip", 2)
 
 
 def getConfigs():
     if getFileSize("./contribute_example.cfg") == 0:
         print("Downloading contribute_example.cfg...")
-        subprocess.call(f"gdown '1pqj2pspklPE3gsZlkJDYs7T0h5dqNQ88&confirm=t' -O ./contribute_example.cfg", shell=True)
+        callShell(f"gdown '1pqj2pspklPE3gsZlkJDYs7T0h5dqNQ88&confirm=t' -O ./contribute_example.cfg")
         print("Downloaded contribute_example.cfg successfully.")
 
 
@@ -76,6 +83,7 @@ def check_libnvinfer_so(version: str):
     try:
         ctypes.cdll.LoadLibrary(targetPath)
     except OSError as e_1:
+        print("Start to download libs...")
         download_libnvinfer_deb(version, lib1_path)
         unpacking_deb(dir_, lib1_path, targetDir)
 
