@@ -34,24 +34,22 @@ def getKataGoLatestVersion():
             size = file["size"]
             break
 
-    if getFileSize("./katago") == 0:
+    k = (isProcessFailed(11) and getFileSize("/content/katago.zip") != size)
+    if getFileSize("/content/katago") == 0 or k:
         print("Downloading katago.zip...")
         status1 = callShell(f"wget -O /content/katago.zip {download_url_}")
-        handle_process(status1, "downloaded katago.zip", "downloading katago.zip", 1)
+        handle_process(status1, "downloaded katago.zip", "downloading katago.zip", 11)
         chmod()
 
-        if isFileExists("/content/katago.zip") and (not isProcessFailed(1)):
+        t = (not isProcessFailed(11)) and getFileSize("/content/katago.zip") == size
+        if isFileExists("/content/katago.zip") and t:
             chmod()
             print("Unzipping katago.zip")
             status2 = callShell("unzip -o /content/katago.zip -d \"/content/\"")
-            handle_process(status2, "unzipped katago.zip", "unzipping katago.zip", 2)
+            handle_process(status2, "unzipped katago.zip", "unzipping katago.zip", 22)
 
-
-def getConfigs():
-    if getFileSize("./contribute_example.cfg") == 0:
-        print("Downloading contribute_example.cfg...")
-        callShell(f"gdown '1pqj2pspklPE3gsZlkJDYs7T0h5dqNQ88&confirm=t' -O ./contribute_example.cfg")
-        print("Downloaded contribute_example.cfg successfully.")
+            if not isProcessFailed(22):
+                callShell("rm -rf /content/katago.zip")
 
 
 def callShell(cmd: str) -> int:
@@ -63,10 +61,15 @@ def unpacking_deb(dir_: str, lib1_path: str, targetDir: str):
         callShell(f"mkdir -p {dir_}/extract")
         cmd_1 = f"dpkg -X {lib1_path} {dir_}/extract"
         cmd_2 = f"cp -rf {dir_}/extract/usr/lib/x86_64-linux-gnu/. {targetDir}"
-        callShell(f"{cmd_1} && {cmd_2}")
-        chmod_file(f"{targetDir}")
-        callShell(f"rm -rf {lib1_path}")
-        callShell(f"rm -rf {dir_}/extract")
+        print("Unpacking lib1.deb...")
+        status5 = callShell(cmd_1)
+        handle_process(status5, "unpacked lib1.deb", "unpacking lib1.deb", 55)
+
+        if not isProcessFailed(55):
+            callShell(cmd_2)
+            chmod_file(f"{targetDir}")
+            callShell(f"rm -rf {lib1_path}")
+            callShell(f"rm -rf {dir_}/extract")
 
 
 def isProcessFailed(code: int) -> int:
