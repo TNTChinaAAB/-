@@ -71,8 +71,8 @@ def isProcessFailed(code: int) -> int:
 def check_libnvinfer_so(version: str):
     dir_ = "/root/byTNTChina"
     lib1_path = f"{dir_}/lib1.deb"
-    targetPath = "/content/work/data/bins/libnvinfer.so.8"
-    targetDir = "/content/work/data/bins"
+    targetPath = "/content/libnvinfer.so.8"
+    targetDir = "/content"
     try:
         ctypes.cdll.LoadLibrary(targetPath)
     except OSError as e_1:
